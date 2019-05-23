@@ -4,15 +4,34 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+import sys
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-requirements = [ ]
+requirements = [
+    'aiohttp'
+]
 
 setup_requirements = [ ]
 
-test_requirements = [ ]
+test_requirements = [
+    'pytest',
+    'pytest-asyncio',
+    'pytest-aiohttp'
+]
+
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errcode = pytest.main(self.test_args)
+        sys.exit(errcode)
 
 setup(
     author="Nat Burns",
@@ -41,6 +60,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
+    cmdclass={'test': PyTest},
     url='https://github.com/burnnat/screenly_ose',
     version='0.0.1',
     zip_safe=False,
