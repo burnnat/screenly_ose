@@ -27,16 +27,18 @@ class Screenly:
     Control your digital signage with Python.
     """
 
-    def __init__(self, websession, host, port=80, encryption=False):
+    def __init__(self, websession, host, port=80, encryption=False, timeout=None):
         """
         Screenly OSE controller.
         :param str host:        Hostname or IP address of device.
         :param int port:        Port to connect to. Default 80.
         :param bool encryption: Use SSL encryption when connecting.
+        :param timeout:         Timeout to use for API requests.
         """
         self._host = host
         self._port = port
         self._encryption = encryption
+        self._timeout = timeout
         http_proto = 'https' if self._encryption else 'http'
         self._http_url = '{http_proto}://{host}:{port}/api'.format(
             http_proto=http_proto,
@@ -77,23 +79,20 @@ class Screenly:
     async def send_request(self, endpoint, params=None, version='v1'):
         """Send request to Screenly."""
         try:
-            timeout = self.__get_timeout(endpoint)
+            url = '{url}/{version}/{endpoint}'.format(
+                url=self._http_url,
+                version=version,
+                endpoint=endpoint
+            )
 
-            with async_timeout.timeout(timeout):
-                url = '{url}/{version}/{endpoint}'.format(
-                    url=self._http_url,
-                    version=version,
-                    endpoint=endpoint
-                )
+            _LOGGER.debug("Sending request to endpoint %s", url)
 
-                _LOGGER.debug("Sending request to endpoint %s", url)
-
-                async with self.websession.get(url=url, params=params, headers=self._headers) as response:
-                    if response.status == HTTP_OK:
-                        return await response.json()
-                    else:
-                        _LOGGER.warning("Error %d from Screenly.", response.status)
-                        return False
+            async with self.websession.get(url=url, params=params, headers=self._headers, timeout=self._timeout) as response:
+                if response.status == HTTP_OK:
+                    return await response.json()
+                else:
+                    _LOGGER.warning("Error %d from Screenly.", response.status)
+                    return False
 
         except (aiohttp.ClientError, aiohttp.ClientConnectionError) as e:
             _LOGGER.exception(e)
