@@ -96,7 +96,7 @@ class Screenly:
                         return False
 
         except (aiohttp.ClientError, aiohttp.ClientConnectionError) as e:
-            _LOGGER.error("Request error: %s", str(e))
+            _LOGGER.exception(e)
             return False
 
     def __get_timeout(self, endpoint):
