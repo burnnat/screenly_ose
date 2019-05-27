@@ -77,7 +77,9 @@ async def test_get_current_asset():
         server.send_response(request, content_type='application/json', text=json.dumps(result))
 
         asset = await task
-        assert asset == result['asset_id']
+        assert asset['id'] == result['asset_id']
+        assert asset['name'] == result['name']
+        assert asset['type'] == result['mimetype']
 
 @pytest.mark.asyncio
 async def test_next_asset():
