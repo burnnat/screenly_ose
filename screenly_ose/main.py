@@ -15,8 +15,7 @@ from .const import (
     NEXT_ASSET,
     PREVIOUS_ASSET,
     SWITCH_ASSET,
-    CURRENT_ASSET,
-    TIMEOUT_TIMES
+    CURRENT_ASSET
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,8 +55,13 @@ class Screenly:
 
         if not response:
             return False
+
         try:
-            return response['asset_id']
+            asset = {}
+            asset['id'] = response['asset_id']
+            asset['name'] = response['name']
+            asset['type'] = response['mimetype']
+            return asset
         except KeyError:
             return False
 
@@ -97,9 +101,3 @@ class Screenly:
         except (aiohttp.ClientError, aiohttp.ClientConnectionError) as e:
             _LOGGER.exception(e)
             return False
-
-    def __get_timeout(self, endpoint):
-        if endpoint in TIMEOUT_TIMES:
-            return TIMEOUT_TIMES[endpoint]
-        else:
-            return TIMEOUT_TIMES['default']
