@@ -52,6 +52,14 @@ All instance methods return `False` in the event of a request error.
   
     Requests Screenly to display the asset with the given ID string.
 
+  - `enable_asset(asset_id)`
+  
+    Updates the given asset to be enabled.
+  
+  - `disable_asset(asset_id)`
+  
+    Updates the given asset to be disabled.
+
 ## Credits
 
 This package was created with
