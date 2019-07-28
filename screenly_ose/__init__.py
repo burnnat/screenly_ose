@@ -4,6 +4,6 @@
 
 __author__ = """Nat Burns"""
 __email__ = 'nbaccount@burnskids.com'
-__version__ = '0.0.1'
+__version__ = '0.0.3'
 
 from screenly_ose.main import Screenly
