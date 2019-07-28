@@ -5,6 +5,7 @@ HTTP_OK = 200
 ACCEPT_ENCODING = "gzip, deflate"
 ACCEPT_HEADER = "application/json"
 
+ASSET = "assets/{id}"
 NEXT_ASSET = "assets/control/next"
 PREVIOUS_ASSET = "assets/control/previous"
 SWITCH_ASSET = "assets/control/asset&{id}"

@@ -12,6 +12,7 @@ from .const import (
     ACCEPT_ENCODING,
     ACCEPT_HEADER,
     HTTP_OK,
+    ASSET,
     NEXT_ASSET,
     PREVIOUS_ASSET,
     SWITCH_ASSET,
@@ -80,7 +81,32 @@ class Screenly:
         response = await self.send_request(SWITCH_ASSET.format(id=asset_id))
         return bool(response)
 
-    async def send_request(self, endpoint, params=None, version='v1'):
+    async def enable_asset(self, asset_id):
+        """Mark the specified asset as enabled on the device."""
+        return await self.update_asset(asset_id, { 'is_enabled': 1 })
+
+    async def disable_asset(self, asset_id):
+        """Mark the specified asset as disabled on the device."""
+        return await self.update_asset(asset_id, { 'is_enabled': 0 })
+
+    async def update_asset(self, asset_id, props):
+        """Update an existing asset on the device with specified properties."""
+        asset = await self.send_request(ASSET.format(id=asset_id), version='v1.2')
+        
+        if not asset:
+            return False
+
+        try:
+            keys = ['name', 'mimetype', 'start_date', 'end_date', 'duration', 'is_enabled', 'play_order', 'nocache', 'uri', 'skip_asset_check']
+            body = { x: asset[x] for x in keys }
+            body.update(props)
+            
+            response = await self.send_request(ASSET.format(id=asset_id), json=body, method='PUT', version='v1.2')
+            return bool(response)
+        except KeyError:
+            return False
+
+    async def send_request(self, endpoint, params=None, json=None, method='GET', version='v1'):
         """Send request to Screenly."""
         try:
             url = '{url}/{version}/{endpoint}'.format(
@@ -91,7 +117,7 @@ class Screenly:
 
             _LOGGER.debug("Sending request to endpoint %s", url)
 
-            async with self.websession.get(url=url, params=params, headers=self._headers, timeout=self._timeout) as response:
+            async with self.websession.request(method=method, url=url, params=params, json=json, headers=self._headers, timeout=self._timeout) as response:
                 if response.status == HTTP_OK:
                     return await response.json()
                 else:
@@ -99,5 +125,5 @@ class Screenly:
                     return False
 
         except (aiohttp.ClientError, aiohttp.ClientConnectionError) as e:
-            _LOGGER.exception(e)
+            _LOGGER.debug(e, exc_info=True)
             return False
