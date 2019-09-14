@@ -10,6 +10,7 @@ NEXT_ASSET = "assets/control/next"
 PREVIOUS_ASSET = "assets/control/previous"
 SWITCH_ASSET = "assets/control/asset&{id}"
 CURRENT_ASSET = "viewer_current_asset"
+LIST_ASSETS = "assets"
 
 TYPE_IMAGE = "image"
 TYPE_WEBPAGE = "webpage"

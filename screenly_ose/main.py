@@ -16,7 +16,8 @@ from .const import (
     NEXT_ASSET,
     PREVIOUS_ASSET,
     SWITCH_ASSET,
-    CURRENT_ASSET
+    CURRENT_ASSET,
+    LIST_ASSETS
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,6 +51,27 @@ class Screenly:
         }
         self.websession = websession
 
+    def parse_asset(self, raw):
+        try:
+            asset = {}
+            asset['id'] = raw['asset_id']
+            asset['name'] = raw['name']
+            asset['type'] = raw['mimetype']
+            asset['enabled'] = raw['is_enabled'] == 1
+            asset['active'] = raw['is_active'] == 1
+            return asset
+        except KeyError:
+            return False
+
+    async def list_assets(self):
+        """Query the device for details on all registered assets."""
+        response = await self.send_request(LIST_ASSETS, version='v1.2')
+
+        if not response:
+            return False
+
+        return list(map(self.parse_asset, response))
+
     async def get_current_asset(self):
         """Query the device for the asset currently being displayed."""
         response = await self.send_request(CURRENT_ASSET)
@@ -57,14 +79,7 @@ class Screenly:
         if not response:
             return False
 
-        try:
-            asset = {}
-            asset['id'] = response['asset_id']
-            asset['name'] = response['name']
-            asset['type'] = response['mimetype']
-            return asset
-        except KeyError:
-            return False
+        return self.parse_asset(response)
 
     async def next_asset(self):
         """Request the device to display the next asset."""
