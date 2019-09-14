@@ -48,6 +48,71 @@ class CaseControlledTestServer(aiohttp.test_utils.RawTestServer):
         self._responses[id(request)].set_result(response)
 
 @pytest.mark.asyncio
+async def test_list_assets():
+    async with CaseControlledTestServer() as server, aiohttp.ClientSession() as websession:
+        loop = asyncio.get_event_loop()
+        await server.start_server(loop)
+
+        screenly = Screenly(websession, 'localhost', port=server.port)
+        task = loop.create_task(screenly.list_assets())
+
+        request = await server.receive_request()
+        assert request.method == 'GET'
+        assert request.path_qs == '/api/v1.2/assets'
+
+        result = []
+
+        item_a = {}
+        item_a['asset_id'] = "572a7750ed0e4d74b757e1cd36e343b7"
+        item_a['mimetype'] = "webpage"
+        item_a['name'] = "Hacker News"
+        item_a['end_date'] = "2025-04-27T09:42:00+00:00"
+        item_a['is_enabled'] = 1
+        item_a['nocache'] = 0
+        item_a['is_active'] = 1
+        item_a['uri'] = "https://news.ycombinator.com"
+        item_a['skip_asset_check'] = 0
+        item_a['duration'] = 30
+        item_a['play_order'] = 1
+        item_a['start_date'] = "2019-04-27T09:42:00+00:00"
+        item_a['is_processing'] = 0
+        result.append(item_a)
+
+        item_b = {}
+        item_b['asset_id'] = "71ac3c6270d74b8f952eca5a0d5f8f3d"
+        item_b['mimetype'] = "webpage"
+        item_b['name'] = "Google"
+        item_b['end_date'] = "2025-04-29T10:06:00+00:00"
+        item_b['is_enabled'] = 1
+        item_b['nocache'] = 0
+        item_b['is_active'] = 0
+        item_b['uri'] = "https://www.google.com"
+        item_b['skip_asset_check'] = 0
+        item_b['duration'] = 30
+        item_b['play_order'] = 2
+        item_b['start_date'] = "2019-04-29T10:06:00+00:00"
+        item_b['is_processing'] = 0
+        result.append(item_b)
+
+        server.send_response(request, content_type='application/json', text=json.dumps(result))
+
+        response = await task
+
+        asset = response[0]
+        assert asset['id'] == item_a['asset_id']
+        assert asset['name'] == item_a['name']
+        assert asset['type'] == item_a['mimetype']
+        assert asset['enabled'] == True
+        assert asset['active'] == True
+
+        asset = response[1]
+        assert asset['id'] == item_b['asset_id']
+        assert asset['name'] == item_b['name']
+        assert asset['type'] == item_b['mimetype']
+        assert asset['enabled'] == True
+        assert asset['active'] == False
+
+@pytest.mark.asyncio
 async def test_get_current_asset():
     async with CaseControlledTestServer() as server, aiohttp.ClientSession() as websession:
         loop = asyncio.get_event_loop()
