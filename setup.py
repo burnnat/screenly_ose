@@ -62,6 +62,6 @@ setup(
     tests_require=test_requirements,
     cmdclass={'test': PyTest},
     url='https://github.com/burnnat/screenly_ose',
-    version='0.0.3',
+    version='0.0.4',
     zip_safe=False,
 )
