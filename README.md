@@ -32,6 +32,16 @@ asyncio.run(run())
 
 All instance methods return `False` in the event of a request error.
 
+  - `list_assets()`
+    
+    Returns a list of dicts describing the currently registered assets. Each dict contains the following info:
+    
+    - `id` (string) The asset ID
+    - `name` (string) The asset name
+    - `type` (string) The asset type
+    - `enabled` (boolean) True if the asset is currently enabled
+    - `active` (boolean) True if the asset is currently being displayed
+
   - `get_current_asset()`
     
     Returns a dict containing the following info about the asset currently being displayed:
